@@ -1,8 +1,5 @@
 .PHONY: build test clean
 
-# The binary to build (just the basename).
-BINARY := monkey
-
 BINARY := monkey
 
 run: build
