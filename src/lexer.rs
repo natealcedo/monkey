@@ -76,7 +76,7 @@ impl<'a> Lexer<'a> {
             _ => Token::Illegal,
         };
         self.read_char();
-        return token;
+        token
     }
 
     fn peek_char(&self) -> u8 {
