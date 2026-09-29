@@ -31,6 +31,11 @@ pub enum Token {
     // Keywords
     FUNCTION,
     LET,
+    TRUE,
+    FALSE,
+    IF,
+    ELSE,
+    RETURN,
 }
 
 pub fn lookup_identifier(input: &str) -> Token {
