@@ -24,3 +24,11 @@ pub enum Token {
     FUNCTION,
     LET,
 }
+
+pub fn lookup_identifier(input: &str) -> Token {
+    match input {
+        "let" => Token::LET,
+        "fn" => Token::FUNCTION,
+        _ => Token::IDENT(input.into()),
+    }
+}
