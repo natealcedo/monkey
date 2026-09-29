@@ -10,11 +10,19 @@ pub enum Token {
     // Operators
     ASSIGN,
     PLUS,
+    DIVIDE,
+    MINUS,
+    BANG,
+    ASTERISK,
+    SLASH,
+    LT,
+    GT,
 
     // Delimiters
     COMMA,
     SEMICOLON,
 
+    // Parentheses and braces
     LPAREN,
     RPAREN,
     LBRACE,
