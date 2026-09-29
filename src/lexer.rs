@@ -44,7 +44,22 @@ impl<'a> Lexer<'a> {
         }
 
         let token = match self.char {
-            b'=' => Token::Assign,
+            b'=' => {
+                if self.peek_char() == b'=' {
+                    self.read_char();
+                    Token::Equal
+                } else {
+                    Token::Assign
+                }
+            }
+            b'!' => {
+                if self.peek_char() == b'=' {
+                    self.read_char();
+                    Token::NotEqual
+                } else {
+                    Token::Bang
+                }
+            }
             b'+' => Token::Plus,
             b'(' => Token::LeftParen,
             b')' => Token::RightParen,
@@ -52,7 +67,6 @@ impl<'a> Lexer<'a> {
             b'}' => Token::RightBrace,
             b',' => Token::Comma,
             b';' => Token::Semicolon,
-            b'!' => Token::Bang,
             b'-' => Token::Minus,
             b'/' => Token::Slash,
             b'*' => Token::Asterisk,
@@ -63,6 +77,14 @@ impl<'a> Lexer<'a> {
         };
         self.read_char();
         return token;
+    }
+
+    fn peek_char(&self) -> u8 {
+        if self.read_position >= self.input.len() {
+            0
+        } else {
+            self.input.as_bytes()[self.read_position]
+        }
     }
 
     fn read_char(&mut self) {
