@@ -1,4 +1,4 @@
-use crate::token::Token;
+use crate::token::{self, Token};
 
 pub struct Lexer<'a> {
     input: &'a str,
@@ -19,7 +19,17 @@ impl<'a> Lexer<'a> {
         lexer
     }
 
-    fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
+        self.skip_white_space();
+
+        if self.is_letter() {
+            return self.read_identifier();
+        }
+
+        if self.char.is_ascii_digit() {
+            return self.read_number();
+        }
+
         let token = match self.char {
             b'=' => Token::ASSIGN,
             b'+' => Token::PLUS,
@@ -45,6 +55,33 @@ impl<'a> Lexer<'a> {
         };
         self.position = self.read_position;
         self.read_position += 1;
+    }
+
+    fn skip_white_space(&mut self) {
+        while self.char.is_ascii_whitespace() {
+            self.read_char();
+        }
+    }
+
+    fn is_letter(&self) -> bool {
+        self.char.is_ascii_alphabetic() || self.char == b'_'
+    }
+
+    fn read_identifier(&mut self) -> Token {
+        let start = self.position;
+        while self.is_letter() {
+            self.read_char();
+        }
+        token::lookup_identifier(self.input[start..self.position].into())
+    }
+
+    fn read_number(&mut self) -> Token {
+        let start = self.position;
+        while self.char.is_ascii_digit() {
+            self.read_char();
+        }
+
+        Token::INT(self.input[start..self.position].into())
     }
 }
 
