@@ -212,6 +212,8 @@ mod tests {
             } else {
             return false;
             }
+            10 == 10;
+            10 != 9;
     ";
         let tests = [
             Token::Let,
@@ -279,6 +281,14 @@ mod tests {
             Token::False,
             Token::Semicolon,
             Token::RBrace,
+            Token::Int("10".into()),
+            Token::Eq,
+            Token::Int("10".into()),
+            Token::Semicolon,
+            Token::Int("10".into()),
+            Token::NotEq,
+            Token::Int("9".into()),
+            Token::Semicolon,
             Token::Eof,
         ];
 
