@@ -190,4 +190,79 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn test_next_token_with_literal_and_operators() {
+        let input = "let five = 5;
+            let ten = 10;
+            let add = fn(x, y) {
+                x + y;
+            };
+            let result = add(five, ten);
+            !-/*5;
+            5 < 10 > 5;
+    ";
+        let tests = [
+            Token::LET,
+            Token::IDENT("five".into()),
+            Token::ASSIGN,
+            Token::INT("5".into()),
+            Token::SEMICOLON,
+            Token::LET,
+            Token::IDENT("ten".into()),
+            Token::ASSIGN,
+            Token::INT("10".into()),
+            Token::SEMICOLON,
+            Token::LET,
+            Token::IDENT("add".into()),
+            Token::ASSIGN,
+            Token::FUNCTION,
+            Token::LPAREN,
+            Token::IDENT("x".into()),
+            Token::COMMA,
+            Token::IDENT("y".into()),
+            Token::RPAREN,
+            Token::LBRACE,
+            Token::IDENT("x".into()),
+            Token::PLUS,
+            Token::IDENT("y".into()),
+            Token::SEMICOLON,
+            Token::RBRACE,
+            Token::SEMICOLON,
+            Token::LET,
+            Token::IDENT("result".into()),
+            Token::ASSIGN,
+            Token::IDENT("add".into()),
+            Token::LPAREN,
+            Token::IDENT("five".into()),
+            Token::COMMA,
+            Token::IDENT("ten".into()),
+            Token::RPAREN,
+            Token::SEMICOLON,
+            Token::BANG,
+            Token::MINUS,
+            Token::SLASH,
+            Token::ASTERISK,
+            Token::INT("5".into()),
+            Token::SEMICOLON,
+            Token::INT("5".into()),
+            Token::LT,
+            Token::INT("10".into()),
+            Token::GT,
+            Token::INT("5".into()),
+            Token::SEMICOLON,
+            Token::EOF,
+        ];
+
+        let mut lexer = Lexer::new(input);
+
+        for (i, expected) in tests.iter().enumerate() {
+            let tok = lexer.next_token();
+
+            assert_eq!(
+                &tok, expected,
+                "tests[{i}] - token wrong. expected={expected:?}, got={tok:?}"
+            );
+        }
+    }
 }
