@@ -1,11 +1,11 @@
 #[derive(Debug, PartialEq)]
 pub enum Token {
     Illegal,
-    Eof,
+    EndOfFile,
 
     // Identifiers + literals
-    Ident(String),
-    Int(String),
+    Identifier(String),
+    Integer(String),
 
     // Operators
     Assign,
@@ -15,20 +15,20 @@ pub enum Token {
     Bang,
     Asterisk,
     Slash,
-    Lt,
-    Gt,
-    Eq,
-    NotEq,
+    LessThan,
+    GreaterThan,
+    Equal,
+    NotEqual,
 
     // Delimiters
     Comma,
     Semicolon,
 
     // Parentheses and braces
-    LParen,
-    RParen,
-    LBrace,
-    RBrace,
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
 
     // Keywords
     Function,
@@ -49,6 +49,6 @@ pub fn lookup_identifier(input: &str) -> Token {
         "if" => Token::If,
         "else" => Token::Else,
         "return" => Token::Return,
-        _ => Token::Ident(input.into()),
+        _ => Token::Identifier(input.into()),
     }
 }
