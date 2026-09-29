@@ -52,6 +52,12 @@ impl<'a> Lexer<'a> {
             b'}' => Token::RBRACE,
             b',' => Token::COMMA,
             b';' => Token::SEMICOLON,
+            b'!' => Token::BANG,
+            b'-' => Token::MINUS,
+            b'/' => Token::SLASH,
+            b'*' => Token::ASTERISK,
+            b'<' => Token::LT,
+            b'>' => Token::GT,
             0 => Token::EOF,
             _ => Token::ILLEGAL,
         };
