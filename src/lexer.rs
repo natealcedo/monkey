@@ -7,6 +7,19 @@ pub struct Lexer<'a> {
     char: u8,             // character under examination
 }
 
+impl<'a> Iterator for Lexer<'a> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let token = self.next_token();
+        if token != Token::EOF {
+            Some(token)
+        } else {
+            None
+        }
+    }
+}
+
 impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Self {
         let mut lexer = Self {
