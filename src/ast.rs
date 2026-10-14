@@ -5,6 +5,12 @@ pub trait TokenLiteral {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Identifier(pub String);
 
+impl TokenLiteral for Identifier {
+    fn token_literal(&self) -> &str {
+        &self.0
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Identifier(Identifier),
