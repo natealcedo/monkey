@@ -30,3 +30,57 @@ impl<'a> Parser<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ast::*;
+
+    #[test]
+    fn test_let_statements() {
+        let input = "
+            let x = 5;
+            let y = 10;
+            let foobar = 838383;
+        ";
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        let count = program.statements.len();
+
+        assert_eq!(
+            count, 3,
+            "program.statements does not contain 3 statements, received {count}"
+        );
+
+        let expected_identifiers = ["x", "y", "foobar"];
+
+        for (i, (statement, expected)) in program
+            .statements
+            .iter()
+            .zip(expected_identifiers)
+            .enumerate()
+        {
+            assert_let_statement(i, statement, expected)
+        }
+    }
+
+    fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {
+        assert_eq!(
+            statement.token_literal(),
+            "let",
+            "tests[{i}] - token_literal not 'let'"
+        );
+
+        let Statement::Let(let_statement) = statement else {
+            panic!("tests[{i}] - statement not a let statement, got {statement:?}");
+        };
+
+        assert_eq!(
+            let_statement.name.0, expected_name,
+            "tests[{i}] - name wrong"
+        );
+    }
+}
