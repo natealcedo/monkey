@@ -146,8 +146,20 @@ impl<'a> Parser<'a> {
         Some(Expression::Identifier(Identifier(name.clone())))
     }
 
-    fn parse_integer_literal(&self) -> Option<Expression> {
-        todo!()
+    fn parse_integer_literal(&mut self) -> Option<Expression> {
+        let Token::Integer(literal) = &self.current_token else {
+            return None;
+        };
+
+        let Ok(value) = literal.parse::<i64>() else {
+            self.errors.push(format!("could not parse: {:?}", literal));
+            return None;
+        };
+
+        Some(Expression::Integer {
+            value,
+            literal: literal.clone(),
+        })
     }
 
     fn parse_prefix_expression(&self) -> Option<Expression> {
