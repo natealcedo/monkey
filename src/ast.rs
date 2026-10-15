@@ -1,3 +1,5 @@
+use std::fmt::{self, Display, write};
+
 pub trait TokenLiteral {
     fn token_literal(&self) -> &str;
 }
@@ -11,6 +13,12 @@ impl TokenLiteral for Identifier {
     }
 }
 
+impl Display for Identifier {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Identifier(Identifier),
@@ -20,6 +28,14 @@ impl TokenLiteral for Expression {
     fn token_literal(&self) -> &str {
         match self {
             Self::Identifier(identifier) => &identifier.0,
+        }
+    }
+}
+
+impl Display for Expression {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Identifier(identifier) => write!(f, "{identifier}"),
         }
     }
 }
@@ -45,6 +61,15 @@ pub enum Statement {
     Return,
 }
 
+impl Display for Statement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Let(statement) => write!(f, "{statement}"),
+            Self::Return => write!(f, "return;"),
+        }
+    }
+}
+
 impl TokenLiteral for Statement {
     fn token_literal(&self) -> &str {
         match self {
@@ -61,13 +86,49 @@ pub struct LetStatement {
     pub value: Option<Expression>,
 }
 
+impl Display for LetStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "let {} = ", self.name)?;
+        if let Some(value) = &self.value {
+            write!(f, "{value}")?;
+        }
+        write!(f, ";")
+    }
+}
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Program {
     pub statements: Vec<Statement>,
 }
 
+impl Display for Program {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for statement in &self.statements {
+            write!(f, "{statement}")?
+        }
+        Ok(())
+    }
+}
+
 impl TokenLiteral for Program {
     fn token_literal(&self) -> &str {
         self.statements.first().map_or("", |s| s.token_literal())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_string() {
+        let program = Program {
+            statements: vec![Statement::Let(LetStatement {
+                name: Identifier("myVar".into()),
+                value: Some(Expression::Identifier(Identifier("anotherVar".into()))),
+            })],
+        };
+        assert_eq!(program.to_string(), "let myVar = anotherVar;")
     }
 }
