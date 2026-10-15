@@ -152,7 +152,8 @@ impl<'a> Parser<'a> {
         };
 
         let Ok(value) = literal.parse::<i64>() else {
-            self.errors.push(format!("could not parse: {:?}", literal));
+            self.errors
+                .push(format!("could not parse {literal:?} as integer"));
             return None;
         };
 
