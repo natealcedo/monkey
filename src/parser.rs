@@ -8,6 +8,7 @@ pub struct Parser<'a> {
     lexer: Lexer<'a>,
     current_token: Token,
     peek_token: Token,
+    errors: Vec<String>,
 }
 
 impl<'a> Parser<'a> {
@@ -19,13 +20,8 @@ impl<'a> Parser<'a> {
             lexer,
             current_token,
             peek_token,
+            errors: Vec::new(),
         }
-    }
-
-    fn next_token(&mut self) {
-        let new_token = self.lexer.next_token();
-        let old_peek = std::mem::replace(&mut self.peek_token, new_token);
-        self.current_token = old_peek;
     }
 
     pub fn parse_program(&mut self) -> Program {
@@ -41,6 +37,24 @@ impl<'a> Parser<'a> {
         }
 
         program
+    }
+
+    pub fn errors(&self) -> &[String] {
+        &self.errors
+    }
+
+    fn peek_error(&mut self, expected: &str) {
+        let message = format!(
+            "expected next token to be {expected}, got {:?} instead",
+            self.peek_token
+        );
+        self.errors.push(message);
+    }
+
+    fn next_token(&mut self) {
+        let new_token = self.lexer.next_token();
+        let old_peek = std::mem::replace(&mut self.peek_token, new_token);
+        self.current_token = old_peek;
     }
 
     fn parse_statement(&mut self) -> Option<Statement> {
