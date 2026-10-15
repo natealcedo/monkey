@@ -175,13 +175,13 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_expression_statement(&mut self) -> Option<Statement> {
-        let expression = self.parse_expression(Precedence::Lowest)?;
+        let expression = self.parse_expression(Precedence::Lowest);
 
         if self.peek_token_is(&Token::Semicolon) {
             self.next_token();
         }
 
-        Some(Statement::Expression(expression))
+        Some(Statement::Expression(expression?))
     }
 
     fn parse_expression(&mut self, _precedence: Precedence) -> Option<Expression> {
