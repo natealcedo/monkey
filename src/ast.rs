@@ -1,4 +1,4 @@
-use std::fmt::{self, Display, write};
+use std::fmt::{self, Display};
 
 pub trait TokenLiteral {
     fn token_literal(&self) -> &str;
