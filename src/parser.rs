@@ -60,6 +60,7 @@ impl<'a> Parser<'a> {
     fn parse_statement(&mut self) -> Option<Statement> {
         match self.current_token {
             Token::Let => self.parse_let_statement(),
+            Token::Return => self.parse_return_statement(),
             _ => None,
         }
     }
@@ -98,11 +99,20 @@ impl<'a> Parser<'a> {
             return None;
         }
         // TODO: We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::Semicolon) {
+        while !self.current_token_is(Token::Semicolon) && !self.current_token_is(Token::EndOfFile) {
             self.next_token();
         }
 
         Some(Statement::Let(LetStatement { name }))
+    }
+
+    fn parse_return_statement(&mut self) -> Option<Statement> {
+        // TODO: We're skipping the expressions until we encounter a semicolon
+        while !self.current_token_is(Token::Semicolon) && !self.current_token_is(Token::EndOfFile) {
+            self.next_token();
+        }
+
+        Some(Statement::Return)
     }
 }
 
@@ -186,6 +196,29 @@ mod tests {
                 "tests[{i}] - statement not a return statement, got {statement:?}"
             )
         }
+    }
+
+    #[test]
+    fn test_let_statement_without_semicolon() {
+        let lexer = Lexer::new("let x = 5");
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        check_parser_errors(&parser);
+
+        assert_eq!(program.statements.len(), 1);
+        assert_let_statement(0, &program.statements[0], "x");
+    }
+
+    #[test]
+    fn test_return_statement_without_semicolon() {
+        let lexer = Lexer::new("return 5");
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        check_parser_errors(&parser);
+
+        assert_eq!(program.statements, [Statement::Return]);
     }
 
     fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {
