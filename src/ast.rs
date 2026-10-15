@@ -55,7 +55,8 @@ impl TokenLiteral for Statement {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LetStatement {
     pub name: Identifier,
-    pub value: Expression,
+    // TODO: Add back experession once we start parsing expressions
+    // pub value: Expression,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]

@@ -1,4 +1,8 @@
-use crate::{ast::Program, lexer::Lexer, token::Token};
+use crate::{
+    ast::{Identifier, LetStatement, Program, Statement},
+    lexer::Lexer,
+    token::Token,
+};
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
@@ -25,9 +29,65 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_program(&mut self) -> Program {
-        Program {
+        let mut program = Program {
             statements: Vec::new(),
+        };
+
+        while self.current_token != Token::EndOfFile && !self.current_token_is(Token::EndOfFile) {
+            if let Some(statement) = self.parse_statement() {
+                program.statements.push(statement)
+            }
+            self.next_token();
         }
+
+        program
+    }
+
+    fn parse_statement(&mut self) -> Option<Statement> {
+        match self.current_token {
+            Token::Let => self.parse_let_statement(),
+            _ => None,
+        }
+    }
+
+    fn current_token_is(&self, token: Token) -> bool {
+        self.current_token == token
+    }
+
+    fn peek_token_is(&self, token: Token) -> bool {
+        self.peek_token == token
+    }
+
+    fn expect_peek(&mut self, token: Token) -> bool {
+        if self.peek_token_is(token) {
+            self.next_token();
+            true
+        } else {
+            false
+        }
+    }
+
+    fn expect_peek_identifier(&mut self) -> Option<Identifier> {
+        let Token::Identifier(name) = &self.peek_token else {
+            return None;
+        };
+        let identifier = Identifier(name.clone());
+        self.next_token();
+        Some(identifier)
+    }
+
+    fn parse_let_statement(&mut self) -> Option<Statement> {
+        let name = self.expect_peek_identifier()?;
+
+        if !self.expect_peek(Token::Assign) {
+            return None;
+        }
+        // TODO: We're skipping the expressions until we encounter a semicolon
+        while !self.current_token_is(Token::Semicolon) {
+            self.next_token();
+        }
+
+        Some(Statement::Let(LetStatement { name }))
     }
 }
 
@@ -81,6 +141,12 @@ mod tests {
         assert_eq!(
             let_statement.name.0, expected_name,
             "tests[{i}] - name wrong"
+        );
+
+        assert_eq!(
+            let_statement.name.token_literal(),
+            expected_name,
+            "tests[{i}] - name.token_literal() wrong"
         );
     }
 }
