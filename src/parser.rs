@@ -4,6 +4,17 @@ use crate::{
     token::Token,
 };
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Precedence {
+    Lowest,
+    Equals,      // ==
+    LessGreater, // > or <
+    Sum,         // +
+    Product,     // *
+    Prefix,      // -X or !X
+    Call,        // myFunction(X)
+}
+
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
     current_token: Token,
@@ -73,7 +84,7 @@ impl<'a> Parser<'a> {
         match self.current_token {
             Token::Let => self.parse_let_statement(),
             Token::Return => self.parse_return_statement(),
-            _ => None,
+            _ => self.parse_expression_statement(),
         }
     }
 
@@ -129,7 +140,10 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_identifier(&self) -> Option<Expression> {
-        todo!()
+        let Token::Identifier(name) = &self.current_token else {
+            return None;
+        };
+        Some(Expression::Identifier(Identifier(name.clone())))
     }
 
     fn parse_integer_literal(&self) -> Option<Expression> {
@@ -140,8 +154,26 @@ impl<'a> Parser<'a> {
         todo!()
     }
 
-    fn no_prefix_parse_fn_error(&self) {
-        todo!()
+    fn no_prefix_parse_fn_error(&mut self) {
+        let message = format!(
+            "no prefix parse function for {:?} found",
+            self.current_token
+        );
+        self.errors.push(message);
+    }
+
+    fn parse_expression_statement(&mut self) -> Option<Statement> {
+        let expression = self.parse_expression(Precedence::Lowest)?;
+
+        if self.peek_token_is(&Token::Semicolon) {
+            self.next_token();
+        }
+
+        Some(Statement::Expression(expression))
+    }
+
+    fn parse_expression(&mut self, _precedence: Precedence) -> Option<Expression> {
+        self.parse_prefix()
     }
 }
 
@@ -248,6 +280,25 @@ mod tests {
         check_parser_errors(&parser);
 
         assert_eq!(program.statements, [Statement::Return]);
+    }
+
+    #[test]
+    fn test_identifier_expression() {
+        let input = "foobar;";
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        check_parser_errors(&parser);
+
+        assert_eq!(
+            program.statements,
+            [Statement::Expression(Expression::Identifier(Identifier(
+                "foobar".into()
+            )))]
+        );
+        assert_eq!(program.statements[0].token_literal(), "foobar");
     }
 
     fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {

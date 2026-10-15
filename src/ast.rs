@@ -59,6 +59,7 @@ impl TokenLiteral for Node {
 pub enum Statement {
     Let(LetStatement),
     Return,
+    Expression(Expression),
 }
 
 impl Display for Statement {
@@ -66,6 +67,7 @@ impl Display for Statement {
         match self {
             Self::Let(statement) => write!(f, "{statement}"),
             Self::Return => write!(f, "return;"),
+            Self::Expression(expression) => write!(f, "{expression}"),
         }
     }
 }
@@ -75,6 +77,7 @@ impl TokenLiteral for Statement {
         match self {
             Self::Let(_) => "let",
             Self::Return => "return",
+            Self::Expression(expression) => expression.token_literal(),
         }
     }
 }
