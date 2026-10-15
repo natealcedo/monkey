@@ -42,12 +42,14 @@ impl TokenLiteral for Node {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     Let(LetStatement),
+    Return,
 }
 
 impl TokenLiteral for Statement {
     fn token_literal(&self) -> &str {
         match self {
             Self::Let(_) => "let",
+            Self::Return => "return",
         }
     }
 }

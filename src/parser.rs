@@ -155,6 +155,39 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_return_statements() {
+        let input = "
+            return 5;
+            return 10;
+            return 993322;
+        ";
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        check_parser_errors(&parser);
+        let count = program.statements.len();
+
+        assert_eq!(
+            count, 3,
+            "program.statements does not contain 3 statements, received {count}"
+        );
+
+        for (i, statement) in program.statements.iter().enumerate() {
+            assert_eq!(
+                statement.token_literal(),
+                "return",
+                "tests[{i}] - token literal not 'return'"
+            );
+            assert!(
+                matches!(statement, Statement::Return),
+                "tests[{i}] - statement not a return statement, got {statement:?}"
+            )
+        }
+    }
+
     fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {
         assert_eq!(
             statement.token_literal(),
