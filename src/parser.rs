@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Identifier, LetStatement, Program, Statement},
+    ast::{Expression, Identifier, LetStatement, Program, Statement},
     lexer::Lexer,
     token::Token,
 };
@@ -41,6 +41,18 @@ impl<'a> Parser<'a> {
 
     pub fn errors(&self) -> &[String] {
         &self.errors
+    }
+
+    fn parse_prefix(&mut self) -> Option<Expression> {
+        match &self.current_token {
+            Token::Identifier(_) => self.parse_identifier(),
+            Token::Integer(_) => self.parse_integer_literal(),
+            Token::Bang | Token::Minus => self.parse_prefix_expression(),
+            _ => {
+                self.no_prefix_parse_fn_error();
+                None
+            }
+        }
     }
 
     fn peek_error(&mut self, expected: &str) {
@@ -114,6 +126,22 @@ impl<'a> Parser<'a> {
         }
 
         Some(Statement::Return)
+    }
+
+    fn parse_identifier(&self) -> Option<Expression> {
+        todo!()
+    }
+
+    fn parse_integer_literal(&self) -> Option<Expression> {
+        todo!()
+    }
+
+    fn parse_prefix_expression(&self) -> Option<Expression> {
+        todo!()
+    }
+
+    fn no_prefix_parse_fn_error(&self) {
+        todo!()
     }
 }
 
