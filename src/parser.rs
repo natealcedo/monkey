@@ -103,7 +103,8 @@ impl<'a> Parser<'a> {
             self.next_token();
         }
 
-        Some(Statement::Let(LetStatement { name }))
+        // TODO: Add value once we start parsing expressions
+        Some(Statement::Let(LetStatement { name, value: None }))
     }
 
     fn parse_return_statement(&mut self) -> Option<Statement> {

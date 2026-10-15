@@ -58,7 +58,7 @@ impl TokenLiteral for Statement {
 pub struct LetStatement {
     pub name: Identifier,
     // TODO: Add back experession once we start parsing expressions
-    // pub value: Expression,
+    pub value: Option<Expression>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
