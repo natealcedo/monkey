@@ -22,12 +22,14 @@ impl Display for Identifier {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Identifier(Identifier),
+    Integer { value: i64, literal: String },
 }
 
 impl TokenLiteral for Expression {
     fn token_literal(&self) -> &str {
         match self {
             Self::Identifier(identifier) => &identifier.0,
+            Self::Integer { literal, .. } => literal,
         }
     }
 }
@@ -36,6 +38,7 @@ impl Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{identifier}"),
+            Self::Integer { literal, .. } => write!(f, "{literal}"),
         }
     }
 }

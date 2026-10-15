@@ -302,7 +302,7 @@ mod tests {
     }
 
     #[test]
-    fn test_integer_expression() {
+    fn test_integer_literal_expression() {
         let input = "5;";
 
         let lexer = Lexer::new(input);
@@ -313,9 +313,10 @@ mod tests {
 
         assert_eq!(
             program.statements,
-            [Statement::Expression(Expression::Identifier(Identifier(
-                "5".into()
-            )))]
+            [Statement::Expression(Expression::Integer {
+                value: 5,
+                literal: "5".into(),
+            })]
         );
         assert_eq!(program.statements[0].token_literal(), "5");
     }
