@@ -301,6 +301,25 @@ mod tests {
         assert_eq!(program.statements[0].token_literal(), "foobar");
     }
 
+    #[test]
+    fn test_integer_expression() {
+        let input = "5;";
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program();
+        check_parser_errors(&parser);
+
+        assert_eq!(
+            program.statements,
+            [Statement::Expression(Expression::Identifier(Identifier(
+                "5".into()
+            )))]
+        );
+        assert_eq!(program.statements[0].token_literal(), "5");
+    }
+
     fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {
         assert_eq!(
             statement.token_literal(),
