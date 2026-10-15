@@ -111,6 +111,18 @@ mod tests {
     use super::*;
     use crate::ast::*;
 
+    fn check_parser_errors(parser: &Parser) {
+        let errors = parser.errors();
+        if errors.is_empty() {
+            return;
+        }
+        let mut message = format!("parser has {} errors", parser.errors().len());
+        for error in errors {
+            message.push_str(&format!("\nparser error: {error}"));
+        }
+        panic!("{message}");
+    }
+
     #[test]
     fn test_let_statements() {
         let input = "
@@ -123,6 +135,7 @@ mod tests {
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program();
+        check_parser_errors(&parser);
         let count = program.statements.len();
 
         assert_eq!(
