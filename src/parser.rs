@@ -68,15 +68,16 @@ impl<'a> Parser<'a> {
         self.current_token == token
     }
 
-    fn peek_token_is(&self, token: Token) -> bool {
-        self.peek_token == token
+    fn peek_token_is(&self, token: &Token) -> bool {
+        self.peek_token == *token
     }
 
-    fn expect_peek(&mut self, token: Token) -> bool {
+    fn expect_peek(&mut self, token: &Token) -> bool {
         if self.peek_token_is(token) {
             self.next_token();
             true
         } else {
+            self.peek_error(&format!("{token:?}"));
             false
         }
     }
@@ -93,7 +94,7 @@ impl<'a> Parser<'a> {
     fn parse_let_statement(&mut self) -> Option<Statement> {
         let name = self.expect_peek_identifier()?;
 
-        if !self.expect_peek(Token::Assign) {
+        if !self.expect_peek(&Token::Assign) {
             return None;
         }
         // TODO: We're skipping the expressions until we encounter a semicolon
