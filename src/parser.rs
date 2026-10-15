@@ -163,8 +163,18 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn parse_prefix_expression(&self) -> Option<Expression> {
-        todo!()
+    fn parse_prefix_expression(&mut self) -> Option<Expression> {
+        let operator = match self.current_token {
+            Token::Bang => "!",
+            Token::Minus => "-",
+            _ => return None,
+        };
+        self.next_token();
+        let right = self.parse_expression(Precedence::Prefix)?;
+        Some(Expression::Prefix {
+            operator: operator.into(),
+            right: Box::new(right),
+        })
     }
 
     fn no_prefix_parse_fn_error(&mut self) {
