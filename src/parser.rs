@@ -334,6 +334,31 @@ mod tests {
         assert_eq!(program.statements[0].token_literal(), "5");
     }
 
+    #[test]
+    fn test_parsing_prefix_expressions() {
+        let prefix_tests = [("!5;", "!", 5), ("-15;", "-", 15)];
+
+        for (input, operator, integer_value) in prefix_tests {
+            let lexer = Lexer::new(input);
+            let mut parser = Parser::new(lexer);
+
+            let program = parser.parse_program();
+            check_parser_errors(&parser);
+
+            assert_eq!(
+                program.statements,
+                [Statement::Expression(Expression::Prefix {
+                    operator: operator.into(),
+                    right: Box::new(Expression::Integer {
+                        value: integer_value,
+                        literal: integer_value.to_string(),
+                    }),
+                })],
+                "input: {input}"
+            );
+        }
+    }
+
     fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {
         assert_eq!(
             statement.token_literal(),

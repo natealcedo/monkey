@@ -22,7 +22,14 @@ impl Display for Identifier {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Identifier(Identifier),
-    Integer { value: i64, literal: String },
+    Integer {
+        value: i64,
+        literal: String,
+    },
+    Prefix {
+        operator: String,
+        right: Box<Expression>,
+    },
 }
 
 impl TokenLiteral for Expression {
@@ -30,6 +37,7 @@ impl TokenLiteral for Expression {
         match self {
             Self::Identifier(identifier) => &identifier.0,
             Self::Integer { literal, .. } => literal,
+            Self::Prefix { operator, .. } => operator,
         }
     }
 }
@@ -39,6 +47,7 @@ impl Display for Expression {
         match self {
             Self::Identifier(identifier) => write!(f, "{identifier}"),
             Self::Integer { literal, .. } => write!(f, "{literal}"),
+            Self::Prefix { operator, right } => write!(f, "({operator}{right})"),
         }
     }
 }
