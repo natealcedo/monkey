@@ -40,7 +40,7 @@ impl<'a> Parser<'a> {
             statements: Vec::new(),
         };
 
-        while self.current_token != Token::EndOfFile && !self.current_token_is(Token::EndOfFile) {
+        while !self.current_token_is(Token::EndOfFile) {
             if let Some(statement) = self.parse_statement() {
                 program.statements.push(statement)
             }
