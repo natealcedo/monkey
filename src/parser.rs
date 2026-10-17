@@ -393,6 +393,47 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_parsing_infix_expressions() {
+        let infix_tests = [
+            ("5 + 5;", 5, "+", 5),
+            ("5 - 5;", 5, "-", 5),
+            ("5 * 5;", 5, "*", 5),
+            ("5 / 5;", 5, "/", 5),
+            ("5 > 5;", 5, ">", 5),
+            ("5 < 5;", 5, "<", 5),
+            ("5 == 5;", 5, "==", 5),
+            ("5 != 5;", 5, "!=", 5),
+        ];
+
+        for (input, left_value, operator, right_value) in infix_tests {
+            let lexer = Lexer::new(input);
+            let mut parser = Parser::new(lexer);
+
+            let program = parser.parse_program();
+            check_parser_errors(&parser);
+
+            assert_eq!(
+                program.statements,
+                [Statement::Expression(ExpressionStatement {
+                    expression: Expression::Infix(InfixExpression {
+                        left: Box::new(integer_literal(left_value)),
+                        operator: operator.into(),
+                        right: Box::new(integer_literal(right_value)),
+                    }),
+                })],
+                "input: {input}"
+            );
+        }
+    }
+
+    fn integer_literal(value: i64) -> Expression {
+        Expression::Integer(IntegerLiteral {
+            value,
+            literal: value.to_string(),
+        })
+    }
+
     fn assert_let_statement(i: usize, statement: &Statement, expected_name: &str) {
         assert_eq!(
             statement.token_literal(),

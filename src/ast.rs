@@ -133,6 +133,7 @@ pub enum Expression {
     Identifier(Identifier),
     Integer(IntegerLiteral),
     Prefix(PrefixExpression),
+    Infix(InfixExpression),
 }
 
 impl Display for Expression {
@@ -141,6 +142,7 @@ impl Display for Expression {
             Self::Identifier(identifier) => write!(f, "{identifier}"),
             Self::Integer(integer_literal) => write!(f, "{integer_literal}"),
             Self::Prefix(prefix_expression) => write!(f, "{prefix_expression}"),
+            Self::Infix(infix_expression) => write!(f, "{infix_expression}"),
         }
     }
 }
@@ -151,6 +153,7 @@ impl TokenLiteral for Expression {
             Self::Identifier(identifier) => identifier.token_literal(),
             Self::Integer(integer_literal) => integer_literal.token_literal(),
             Self::Prefix(prefix_expression) => prefix_expression.token_literal(),
+            Self::Infix(infix_expression) => infix_expression.token_literal(),
         }
     }
 }
@@ -201,6 +204,25 @@ impl Display for PrefixExpression {
 }
 
 impl TokenLiteral for PrefixExpression {
+    fn token_literal(&self) -> &str {
+        &self.operator
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InfixExpression {
+    pub left: Box<Expression>,
+    pub operator: String,
+    pub right: Box<Expression>,
+}
+
+impl Display for InfixExpression {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({} {} {})", self.left, self.operator, self.right)
+    }
+}
+
+impl TokenLiteral for InfixExpression {
     fn token_literal(&self) -> &str {
         &self.operator
     }
