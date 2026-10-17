@@ -22,22 +22,40 @@ impl Display for Identifier {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Identifier(Identifier),
-    Integer {
-        value: i64,
-        literal: String,
-    },
-    Prefix {
-        operator: String,
-        right: Box<Expression>,
-    },
+    Integer(IntegerLiteral),
+    Prefix(PrefixExpression),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IntegerLiteral {
+    pub value: i64,
+    pub literal: String,
+}
+
+impl Display for IntegerLiteral {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.literal)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrefixExpression {
+    pub operator: String,
+    pub right: Box<Expression>,
+}
+
+impl Display for PrefixExpression {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.operator, self.right)
+    }
 }
 
 impl TokenLiteral for Expression {
     fn token_literal(&self) -> &str {
         match self {
             Self::Identifier(identifier) => &identifier.0,
-            Self::Integer { literal, .. } => literal,
-            Self::Prefix { operator, .. } => operator,
+            Self::Integer(integer_literal) => &integer_literal.literal,
+            Self::Prefix(prefix_expression) => &prefix_expression.operator,
         }
     }
 }
@@ -46,8 +64,8 @@ impl Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{identifier}"),
-            Self::Integer { literal, .. } => write!(f, "{literal}"),
-            Self::Prefix { operator, right } => write!(f, "({operator}{right})"),
+            Self::Integer(intiger_literal) => write!(f, "{intiger_literal}"),
+            Self::Prefix(prefix_expression) => write!(f, "({prefix_expression})",),
         }
     }
 }

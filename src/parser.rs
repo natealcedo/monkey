@@ -1,5 +1,7 @@
 use crate::{
-    ast::{Expression, Identifier, LetStatement, Program, Statement},
+    ast::{
+        Expression, Identifier, IntegerLiteral, LetStatement, PrefixExpression, Program, Statement,
+    },
     lexer::Lexer,
     token::Token,
 };
@@ -157,10 +159,10 @@ impl<'a> Parser<'a> {
             return None;
         };
 
-        Some(Expression::Integer {
+        Some(Expression::Integer(IntegerLiteral {
             value,
             literal: literal.clone(),
-        })
+        }))
     }
 
     fn parse_prefix_expression(&mut self) -> Option<Expression> {
@@ -171,10 +173,10 @@ impl<'a> Parser<'a> {
         };
         self.next_token();
         let right = self.parse_expression(Precedence::Prefix)?;
-        Some(Expression::Prefix {
+        Some(Expression::Prefix(PrefixExpression {
             operator: operator.into(),
             right: Box::new(right),
-        })
+        }))
     }
 
     fn no_prefix_parse_fn_error(&mut self) {
@@ -336,10 +338,10 @@ mod tests {
 
         assert_eq!(
             program.statements,
-            [Statement::Expression(Expression::Integer {
+            [Statement::Expression(Expression::Integer(IntegerLiteral {
                 value: 5,
                 literal: "5".into(),
-            })]
+            }))]
         );
         assert_eq!(program.statements[0].token_literal(), "5");
     }
@@ -354,16 +356,17 @@ mod tests {
 
             let program = parser.parse_program();
             check_parser_errors(&parser);
-
             assert_eq!(
                 program.statements,
-                [Statement::Expression(Expression::Prefix {
-                    operator: operator.into(),
-                    right: Box::new(Expression::Integer {
-                        value: integer_value,
-                        literal: integer_value.to_string(),
-                    }),
-                })],
+                [Statement::Expression(Expression::Prefix(
+                    PrefixExpression {
+                        operator: operator.into(),
+                        right: Box::new(Expression::Integer(IntegerLiteral {
+                            value: integer_value,
+                            literal: integer_value.to_string(),
+                        })),
+                    }
+                ))],
                 "input: {input}"
             );
         }
