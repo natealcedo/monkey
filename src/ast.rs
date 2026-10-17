@@ -38,6 +38,12 @@ impl Display for IntegerLiteral {
     }
 }
 
+impl TokenLiteral for IntegerLiteral {
+    fn token_literal(&self) -> &str {
+        &self.literal
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrefixExpression {
     pub operator: String,
@@ -46,16 +52,22 @@ pub struct PrefixExpression {
 
 impl Display for PrefixExpression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}", self.operator, self.right)
+        write!(f, "({}{})", self.operator, self.right)
+    }
+}
+
+impl TokenLiteral for PrefixExpression {
+    fn token_literal(&self) -> &str {
+        &self.operator
     }
 }
 
 impl TokenLiteral for Expression {
     fn token_literal(&self) -> &str {
         match self {
-            Self::Identifier(identifier) => &identifier.0,
-            Self::Integer(integer_literal) => &integer_literal.literal,
-            Self::Prefix(prefix_expression) => &prefix_expression.operator,
+            Self::Identifier(identifier) => identifier.token_literal(),
+            Self::Integer(integer_literal) => integer_literal.token_literal(),
+            Self::Prefix(prefix_expression) => prefix_expression.token_literal(),
         }
     }
 }
@@ -64,8 +76,8 @@ impl Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{identifier}"),
-            Self::Integer(intiger_literal) => write!(f, "{intiger_literal}"),
-            Self::Prefix(prefix_expression) => write!(f, "({prefix_expression})",),
+            Self::Integer(integer_literal) => write!(f, "{integer_literal}"),
+            Self::Prefix(prefix_expression) => write!(f, "{prefix_expression}"),
         }
     }
 }
@@ -105,9 +117,9 @@ impl Display for Statement {
 impl TokenLiteral for Statement {
     fn token_literal(&self) -> &str {
         match self {
-            Self::Let(_) => "let",
-            Self::Return(_) => "return",
-            Self::Expression(statement) => statement.expression.token_literal(),
+            Self::Let(statement) => statement.token_literal(),
+            Self::Return(statement) => statement.token_literal(),
+            Self::Expression(statement) => statement.token_literal(),
         }
     }
 }
@@ -115,7 +127,7 @@ impl TokenLiteral for Statement {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LetStatement {
     pub name: Identifier,
-    // TODO: Add back experession once we start parsing expressions
+    // TODO: Make this a plain expression once we start parsing expressions
     pub value: Option<Expression>,
 }
 
@@ -129,8 +141,15 @@ impl Display for LetStatement {
     }
 }
 
+impl TokenLiteral for LetStatement {
+    fn token_literal(&self) -> &str {
+        "let"
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnStatement {
+    // TODO: Make this a plain expression once we start parsing expressions
     pub value: Option<Expression>,
 }
 
@@ -141,6 +160,12 @@ impl Display for ReturnStatement {
             write!(f, "{value}")?;
         }
         write!(f, ";")
+    }
+}
+
+impl TokenLiteral for ReturnStatement {
+    fn token_literal(&self) -> &str {
+        "return"
     }
 }
 
@@ -155,6 +180,12 @@ impl Display for ExpressionStatement {
     }
 }
 
+impl TokenLiteral for ExpressionStatement {
+    fn token_literal(&self) -> &str {
+        self.expression.token_literal()
+    }
+}
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Program {
     pub statements: Vec<Statement>,
@@ -163,7 +194,7 @@ pub struct Program {
 impl Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for statement in &self.statements {
-            write!(f, "{statement}")?
+            write!(f, "{statement}")?;
         }
         Ok(())
     }
@@ -183,11 +214,25 @@ mod tests {
     #[test]
     fn test_string() {
         let program = Program {
-            statements: vec![Statement::Let(LetStatement {
-                name: Identifier("myVar".into()),
-                value: Some(Expression::Identifier(Identifier("anotherVar".into()))),
-            })],
+            statements: vec![
+                Statement::Let(LetStatement {
+                    name: Identifier("myVar".into()),
+                    value: Some(Expression::Identifier(Identifier("anotherVar".into()))),
+                }),
+                Statement::Return(ReturnStatement {
+                    value: Some(Expression::Integer(IntegerLiteral {
+                        value: 5,
+                        literal: "5".into(),
+                    })),
+                }),
+                Statement::Expression(ExpressionStatement {
+                    expression: Expression::Prefix(PrefixExpression {
+                        operator: "-".into(),
+                        right: Box::new(Expression::Identifier(Identifier("x".into()))),
+                    }),
+                }),
+            ],
         };
-        assert_eq!(program.to_string(), "let myVar = anotherVar;")
+        assert_eq!(program.to_string(), "let myVar = anotherVar;return 5;(-x)");
     }
 }
