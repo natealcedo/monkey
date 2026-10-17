@@ -4,81 +4,23 @@ pub trait TokenLiteral {
     fn token_literal(&self) -> &str;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Identifier(pub String);
-
-impl TokenLiteral for Identifier {
-    fn token_literal(&self) -> &str {
-        &self.0
-    }
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct Program {
+    pub statements: Vec<Statement>,
 }
 
-impl Display for Identifier {
+impl Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Expression {
-    Identifier(Identifier),
-    Integer(IntegerLiteral),
-    Prefix(PrefixExpression),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct IntegerLiteral {
-    pub value: i64,
-    pub literal: String,
-}
-
-impl Display for IntegerLiteral {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.literal)
-    }
-}
-
-impl TokenLiteral for IntegerLiteral {
-    fn token_literal(&self) -> &str {
-        &self.literal
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PrefixExpression {
-    pub operator: String,
-    pub right: Box<Expression>,
-}
-
-impl Display for PrefixExpression {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}{})", self.operator, self.right)
-    }
-}
-
-impl TokenLiteral for PrefixExpression {
-    fn token_literal(&self) -> &str {
-        &self.operator
-    }
-}
-
-impl TokenLiteral for Expression {
-    fn token_literal(&self) -> &str {
-        match self {
-            Self::Identifier(identifier) => identifier.token_literal(),
-            Self::Integer(integer_literal) => integer_literal.token_literal(),
-            Self::Prefix(prefix_expression) => prefix_expression.token_literal(),
+        for statement in &self.statements {
+            write!(f, "{statement}")?;
         }
+        Ok(())
     }
 }
 
-impl Display for Expression {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Identifier(identifier) => write!(f, "{identifier}"),
-            Self::Integer(integer_literal) => write!(f, "{integer_literal}"),
-            Self::Prefix(prefix_expression) => write!(f, "{prefix_expression}"),
-        }
+impl TokenLiteral for Program {
+    fn token_literal(&self) -> &str {
+        self.statements.first().map_or("", |s| s.token_literal())
     }
 }
 
@@ -186,23 +128,81 @@ impl TokenLiteral for ExpressionStatement {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct Program {
-    pub statements: Vec<Statement>,
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Expression {
+    Identifier(Identifier),
+    Integer(IntegerLiteral),
+    Prefix(PrefixExpression),
 }
 
-impl Display for Program {
+impl Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for statement in &self.statements {
-            write!(f, "{statement}")?;
+        match self {
+            Self::Identifier(identifier) => write!(f, "{identifier}"),
+            Self::Integer(integer_literal) => write!(f, "{integer_literal}"),
+            Self::Prefix(prefix_expression) => write!(f, "{prefix_expression}"),
         }
-        Ok(())
     }
 }
 
-impl TokenLiteral for Program {
+impl TokenLiteral for Expression {
     fn token_literal(&self) -> &str {
-        self.statements.first().map_or("", |s| s.token_literal())
+        match self {
+            Self::Identifier(identifier) => identifier.token_literal(),
+            Self::Integer(integer_literal) => integer_literal.token_literal(),
+            Self::Prefix(prefix_expression) => prefix_expression.token_literal(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Identifier(pub String);
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl TokenLiteral for Identifier {
+    fn token_literal(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IntegerLiteral {
+    pub value: i64,
+    pub literal: String,
+}
+
+impl Display for IntegerLiteral {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.literal)
+    }
+}
+
+impl TokenLiteral for IntegerLiteral {
+    fn token_literal(&self) -> &str {
+        &self.literal
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrefixExpression {
+    pub operator: String,
+    pub right: Box<Expression>,
+}
+
+impl Display for PrefixExpression {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}{})", self.operator, self.right)
+    }
+}
+
+impl TokenLiteral for PrefixExpression {
+    fn token_literal(&self) -> &str {
+        &self.operator
     }
 }
 
