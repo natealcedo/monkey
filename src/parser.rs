@@ -1,6 +1,7 @@
 use crate::{
     ast::{
-        Expression, Identifier, IntegerLiteral, LetStatement, PrefixExpression, Program, Statement,
+        Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement,
+        PrefixExpression, Program, ReturnStatement, Statement,
     },
     lexer::Lexer,
     token::Token,
@@ -138,7 +139,7 @@ impl<'a> Parser<'a> {
             self.next_token();
         }
 
-        Some(Statement::Return)
+        Some(Statement::Return(ReturnStatement { value: None }))
     }
 
     fn parse_identifier(&self) -> Option<Expression> {
@@ -194,7 +195,9 @@ impl<'a> Parser<'a> {
             self.next_token();
         }
 
-        Some(Statement::Expression(expression?))
+        Some(Statement::Expression(ExpressionStatement {
+            expression: expression?,
+        }))
     }
 
     fn parse_expression(&mut self, _precedence: Precedence) -> Option<Expression> {
@@ -278,7 +281,10 @@ mod tests {
                 "tests[{i}] - token literal not 'return'"
             );
             assert!(
-                matches!(statement, Statement::Return),
+                matches!(
+                    statement,
+                    Statement::Return(ReturnStatement { value: None })
+                ),
                 "tests[{i}] - statement not a return statement, got {statement:?}"
             )
         }
@@ -304,7 +310,10 @@ mod tests {
         let program = parser.parse_program();
         check_parser_errors(&parser);
 
-        assert_eq!(program.statements, [Statement::Return]);
+        assert_eq!(
+            program.statements,
+            [Statement::Return(ReturnStatement { value: None })]
+        );
     }
 
     #[test]
@@ -319,10 +328,11 @@ mod tests {
 
         assert_eq!(
             program.statements,
-            [Statement::Expression(Expression::Identifier(Identifier(
-                "foobar".into()
-            )))]
+            [Statement::Expression(ExpressionStatement {
+                expression: Expression::Identifier(Identifier("foobar".into())),
+            })]
         );
+
         assert_eq!(program.statements[0].token_literal(), "foobar");
     }
 
@@ -338,10 +348,12 @@ mod tests {
 
         assert_eq!(
             program.statements,
-            [Statement::Expression(Expression::Integer(IntegerLiteral {
-                value: 5,
-                literal: "5".into(),
-            }))]
+            [Statement::Expression(ExpressionStatement {
+                expression: Expression::Integer(IntegerLiteral {
+                    value: 5,
+                    literal: "5".into(),
+                }),
+            })]
         );
         assert_eq!(program.statements[0].token_literal(), "5");
     }
@@ -358,15 +370,15 @@ mod tests {
             check_parser_errors(&parser);
             assert_eq!(
                 program.statements,
-                [Statement::Expression(Expression::Prefix(
-                    PrefixExpression {
+                [Statement::Expression(ExpressionStatement {
+                    expression: Expression::Prefix(PrefixExpression {
                         operator: operator.into(),
                         right: Box::new(Expression::Integer(IntegerLiteral {
                             value: integer_value,
                             literal: integer_value.to_string(),
                         })),
-                    }
-                ))],
+                    }),
+                })],
                 "input: {input}"
             );
         }

@@ -88,16 +88,16 @@ impl TokenLiteral for Node {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     Let(LetStatement),
-    Return,
-    Expression(Expression),
+    Return(ReturnStatement),
+    Expression(ExpressionStatement),
 }
 
 impl Display for Statement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Let(statement) => write!(f, "{statement}"),
-            Self::Return => write!(f, "return;"),
-            Self::Expression(expression) => write!(f, "{expression}"),
+            Self::Return(statement) => write!(f, "{statement}"),
+            Self::Expression(statement) => write!(f, "{statement}"),
         }
     }
 }
@@ -106,8 +106,8 @@ impl TokenLiteral for Statement {
     fn token_literal(&self) -> &str {
         match self {
             Self::Let(_) => "let",
-            Self::Return => "return",
-            Self::Expression(expression) => expression.token_literal(),
+            Self::Return(_) => "return",
+            Self::Expression(statement) => statement.expression.token_literal(),
         }
     }
 }
@@ -126,6 +126,32 @@ impl Display for LetStatement {
             write!(f, "{value}")?;
         }
         write!(f, ";")
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ReturnStatement {
+    pub value: Option<Expression>,
+}
+
+impl Display for ReturnStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "return ")?;
+        if let Some(value) = &self.value {
+            write!(f, "{value}")?;
+        }
+        write!(f, ";")
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExpressionStatement {
+    pub expression: Expression,
+}
+
+impl Display for ExpressionStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.expression)
     }
 }
 
