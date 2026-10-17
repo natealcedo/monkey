@@ -40,6 +40,7 @@ pub enum Token {
     Return,
 }
 
+#[must_use]
 pub fn lookup_identifier(input: &str) -> Token {
     match input {
         "let" => Token::Let,

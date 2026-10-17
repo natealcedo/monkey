@@ -26,6 +26,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+    #[must_use]
     pub fn new(mut lexer: Lexer<'a>) -> Self {
         // Read two tokens so that current_token and peek_token are set
         let current_token = lexer.next_token();
@@ -43,9 +44,9 @@ impl<'a> Parser<'a> {
             statements: Vec::new(),
         };
 
-        while !self.current_token_is(Token::EndOfFile) {
+        while !self.current_token_is(&Token::EndOfFile) {
             if let Some(statement) = self.parse_statement() {
-                program.statements.push(statement)
+                program.statements.push(statement);
             }
             self.next_token();
         }
@@ -53,6 +54,7 @@ impl<'a> Parser<'a> {
         program
     }
 
+    #[must_use]
     pub fn errors(&self) -> &[String] {
         &self.errors
     }
@@ -91,8 +93,8 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn current_token_is(&self, token: Token) -> bool {
-        self.current_token == token
+    fn current_token_is(&self, token: &Token) -> bool {
+        self.current_token == *token
     }
 
     fn peek_token_is(&self, token: &Token) -> bool {
@@ -125,7 +127,8 @@ impl<'a> Parser<'a> {
             return None;
         }
         // TODO: We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::Semicolon) && !self.current_token_is(Token::EndOfFile) {
+        while !self.current_token_is(&Token::Semicolon) && !self.current_token_is(&Token::EndOfFile)
+        {
             self.next_token();
         }
 
@@ -133,9 +136,14 @@ impl<'a> Parser<'a> {
         Some(Statement::Let(LetStatement { name, value: None }))
     }
 
+    #[expect(
+        clippy::unnecessary_wraps,
+        reason = "will return None once return values are parsed"
+    )]
     fn parse_return_statement(&mut self) -> Option<Statement> {
         // TODO: We're skipping the expressions until we encounter a semicolon
-        while !self.current_token_is(Token::Semicolon) && !self.current_token_is(Token::EndOfFile) {
+        while !self.current_token_is(&Token::Semicolon) && !self.current_token_is(&Token::EndOfFile)
+        {
             self.next_token();
         }
 
@@ -209,6 +217,7 @@ impl<'a> Parser<'a> {
 mod tests {
     use super::*;
     use crate::ast::*;
+    use std::fmt::Write;
 
     fn check_parser_errors(parser: &Parser) {
         let errors = parser.errors();
@@ -217,7 +226,7 @@ mod tests {
         }
         let mut message = format!("parser has {} errors", parser.errors().len());
         for error in errors {
-            message.push_str(&format!("\nparser error: {error}"));
+            let _ = write!(message, "\nparser error: {error}");
         }
         panic!("{message}");
     }
@@ -250,7 +259,7 @@ mod tests {
             .zip(expected_identifiers)
             .enumerate()
         {
-            assert_let_statement(i, statement, expected)
+            assert_let_statement(i, statement, expected);
         }
     }
 
@@ -286,7 +295,7 @@ mod tests {
                     Statement::Return(ReturnStatement { value: None })
                 ),
                 "tests[{i}] - statement not a return statement, got {statement:?}"
-            )
+            );
         }
     }
 

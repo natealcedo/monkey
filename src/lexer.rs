@@ -7,20 +7,20 @@ pub struct Lexer<'a> {
     char: u8,             // character under examination
 }
 
-impl<'a> Iterator for Lexer<'a> {
+impl Iterator for Lexer<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
         let token = self.next_token();
-        if token != Token::EndOfFile {
-            Some(token)
-        } else {
-            None
+        match token {
+            Token::EndOfFile => None,
+            token => Some(token),
         }
     }
 }
 
 impl<'a> Lexer<'a> {
+    #[must_use]
     pub fn new(input: &'a str) -> Self {
         let mut lexer = Self {
             input,

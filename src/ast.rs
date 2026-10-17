@@ -84,7 +84,7 @@ impl Display for LetStatement {
 }
 
 impl TokenLiteral for LetStatement {
-    fn token_literal(&self) -> &str {
+    fn token_literal(&self) -> &'static str {
         "let"
     }
 }
@@ -106,7 +106,7 @@ impl Display for ReturnStatement {
 }
 
 impl TokenLiteral for ReturnStatement {
-    fn token_literal(&self) -> &str {
+    fn token_literal(&self) -> &'static str {
         "return"
     }
 }
